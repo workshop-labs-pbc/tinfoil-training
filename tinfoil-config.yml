@@ -4,43 +4,38 @@ cpus: 16
 memory: 524288
 
 containers:
-  - name: "gcsfuse"
-    image: "kapetacom/gcsfuse-ubuntu:v3.2.0"
-    cap_add:
-      - SYS_ADMIN
-    devices:
-      - /dev/fuse
-    security_opt:
-      - apparmor=unconfined
-    volumes:
-      - /mnt/ramdisk/gcs-bucket:/gcs:rshared
-      - /mnt/ramdisk/gcloud_key.json:/key.json:ro
-    env:
-      - BUCKET_NAME: "pollux-enc-prod"
-
-  - name: "ml-training"
+  - name: ml-training
     image: "us-central1-docker.pkg.dev/workshop-labs-pbc/pollux-docker/ml-training@sha256:d5d9911b5c357f83818ef16639342b0483cf2f33d2cbe62bd8e5d047e485fa2d"
+    entrypoint:
+      - python
+    command:
+      - -m
+      - scripts.training_server
     runtime: nvidia
     gpus: all
     ipc: host
-    entrypoint:
-      - python
-    volumes:
-      - /mnt/ramdisk/gcs-bucket:/mnt/gcs
-      - /mnt/ramdisk/gcloud_key.json:/key.json:ro
+    privileged: true
+    shm_size: "16g"
+    ulimits:
+      memlock: -1
+      stack: 67108864
     env:
-      - GOOGLE_APPLICATION_CREDENTIALS: "/key.json"
-      - GCS_BUCKET: "pollux-enc-prod"
-      - GCS_ACCESS: "read-write"
-      - POLLUX_LN_GCS_BUCKET: "gs://pollux-enc-prod"
-      - POLLUX_GCSFUSE_MOUNT_PATH: "/mnt/gcs"
-      - KEY_MODE: "real_keys"
+      - GOOGLE_APPLICATION_CREDENTIALS: /key.json
+      - POLLUX_LN_GCS_BUCKET: gs://pollux-enc-prod
+      - KEY_MODE: real_keys
+      - NCCL_IB_DISABLE: 1
+      - TORCH_NCCL_ASYNC_ERROR_HANDLING: 1
+      - NCCL_P2P_DISABLE: 0
+      - NCCL_NVLS_ENABLE: 0
+      - NCCL_DEBUG: WARN
+      - CUDA_DEVICE_MAX_CONNECTIONS: 1
     secrets:
       - HF_TOKEN
       - TINFOIL_API_KEY
-    command:
-      - "-m"
-      - "scripts.training_server"
+      - INTERNAL_SERVICE_SECRET
+    volumes:
+      - /mnt/ramdisk/gcloud_key.json:/key.json:ro
+      - /mnt/ramdisk/data:/data
 
 shim:
   listen-port: 443
