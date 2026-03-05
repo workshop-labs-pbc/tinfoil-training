@@ -5,7 +5,7 @@ memory: 1900544
 
 containers:
   - name: ml-training
-    image: "us-central1-docker.pkg.dev/workshop-labs-pbc/pollux-docker/ml-training@sha256:d5d9911b5c357f83818ef16639342b0483cf2f33d2cbe62bd8e5d047e485fa2d"
+    image: "us-central1-docker.pkg.dev/workshop-labs-pbc/pollux-docker/ml-training@sha256:9dbf8694125d95f2af55534306fca0b5016f9691473052699fc33fed503ff857"
     entrypoint:
       - python
     command:
