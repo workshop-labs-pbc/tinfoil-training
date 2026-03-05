@@ -1,0 +1,63 @@
+shim-version: v0.3.12@sha256:b81f2295ae6750d61e94f810ce24077360001b6ec795d13643f3170df29e304d
+cvm-version: 0.6.5
+cpus: 16
+memory: 524288
+
+containers:
+  - name: "gcsfuse"
+    image: "kapetacom/gcsfuse-ubuntu:v3.2.0"
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor=unconfined
+    volumes:
+      - /mnt/ramdisk/gcs-bucket:/gcs:rshared
+      - /mnt/ramdisk/gcloud_key.json:/key.json:ro
+    env:
+      - BUCKET_NAME: "pollux-enc-prod"
+
+  - name: "ml-training"
+    image: "us-central1-docker.pkg.dev/workshop-labs-pbc/pollux-docker/ml-training@sha256:d5d9911b5c357f83818ef16639342b0483cf2f33d2cbe62bd8e5d047e485fa2d"
+    runtime: nvidia
+    gpus: all
+    ipc: host
+    entrypoint:
+      - python
+    volumes:
+      - /mnt/ramdisk/gcs-bucket:/mnt/gcs
+      - /mnt/ramdisk/gcloud_key.json:/key.json:ro
+    env:
+      - GOOGLE_APPLICATION_CREDENTIALS: "/key.json"
+      - GCS_BUCKET: "pollux-enc-prod"
+      - GCS_ACCESS: "read-write"
+      - POLLUX_LN_GCS_BUCKET: "gs://pollux-enc-prod"
+      - POLLUX_GCSFUSE_MOUNT_PATH: "/mnt/gcs"
+      - KEY_MODE: "real_keys"
+    secrets:
+      - HF_TOKEN
+      - TINFOIL_API_KEY
+    command:
+      - "-m"
+      - "scripts.training_server"
+
+shim:
+  listen-port: 443
+  upstream-port: 8000
+  publish-attestation: true
+  tls-challenge: dns
+  paths:
+    - /ping
+    - /status
+    - /train
+    - /upload/start
+    - /upload/batch
+    - /upload/finalize
+    - /cancel_task
+    - /queue_status
+    - /list_task_ids
+    - /lock_state
+    - /clear_queue
+    - /list_models
+    - /v1/user/*
