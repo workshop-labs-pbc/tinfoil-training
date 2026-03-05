@@ -14,21 +14,10 @@ containers:
     runtime: nvidia
     gpus: all
     ipc: host
-    privileged: true
-    shm_size: "16g"
-    ulimits:
-      memlock: -1
-      stack: 67108864
     env:
       - GOOGLE_APPLICATION_CREDENTIALS: /key.json
       - POLLUX_LN_GCS_BUCKET: gs://pollux-enc-prod
       - KEY_MODE: real_keys
-      - NCCL_IB_DISABLE: 1
-      - TORCH_NCCL_ASYNC_ERROR_HANDLING: 1
-      - NCCL_P2P_DISABLE: 0
-      - NCCL_NVLS_ENABLE: 0
-      - NCCL_DEBUG: WARN
-      - CUDA_DEVICE_MAX_CONNECTIONS: 1
     secrets:
       - HF_TOKEN
       - TINFOIL_API_KEY
