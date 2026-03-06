@@ -33,16 +33,29 @@ shim:
   publish-attestation: true
   tls-challenge: dns
   paths:
-    - /ping
+    - /dev/ping
+    - /prod/ping
     - /status
     - /train
+    - /dev/train
+    - /prod/train
     - /upload/start
+    - /dev/upload/start
+    - /prod/upload/start
     - /upload/batch
+    - /dev/upload/batch
+    - /prod/upload/batch
     - /upload/finalize
+    - /dev/upload/finalize
+    - /prod/upload/finalize
     - /cancel_task
+    - /retry
     - /queue_status
     - /list_task_ids
     - /lock_state
     - /clear_queue
     - /list_models
+    - /dev/list_models
+    - /prod/list_models
     - /v1/user/*
+
