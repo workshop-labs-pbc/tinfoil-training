@@ -22,7 +22,6 @@ containers:
       - /mnt/ramdisk/gcloud_key.json:/key.json:ro
       - /mnt/ramdisk/data:/data
     secrets:
-      - GCLOUD_KEY
       - HF_TOKEN
       - TINFOIL_API_KEY
       - INTERNAL_SERVICE_SECRET
